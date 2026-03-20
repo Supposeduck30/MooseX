@@ -3,11 +3,6 @@
 ## Drive System
 ```mermaid
 classDiagram
-    subgraph "Core Interfaces"
-        direction LR
-        Drivetrain
-        HardwareManager
-    end
     class Drivetrain {
         <<interface>>
         +hwManager: HardwareManager
