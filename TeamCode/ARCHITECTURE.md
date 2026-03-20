@@ -16,4 +16,6 @@ classDiagram
     class MecanumDrivetrain {
         impl: Drivetrain
     }
+
+    MecanumDrivetrain <|.. Drivetrain
 ```
