@@ -1,15 +1,42 @@
-@file:Suppress("unused")
+@file:Suppress("unused", "PackageName")
+
+/**
+ * @author Achintya Akula, Sohum Arora, Topher Fontana
+ */
 
 package com.apexpathing.util.math
 
 import com.apexpathing.geometry.Vector
+import com.apexpathing.util.math.ApexCoordinates
+import com.apexpathing.util.math.CoordinateSystem
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.math.sqrt
 
 /**
- * @author Achintya Akula, Sohum Arora, Topher Fontana
+ * Class to represent a position in 2d space consisting of x-y coordinates and a heading orientation
+ *
+ * Provides methods for arithmetic functions with positions, flexible coordinate systems
+ * Methods include:
+ *   Utility Functions:
+ *    - distanceTo
+ *    - distanceFrom
+ *    - distanceSquaredFrom
+ *    - asVector
+ *    - inCoordinateSystem
+ *
+ *   Transformation functions:
+ *    - reflectX
+ *    - withReflectedX
+ *    - reflectY
+ *    - withReflectedY
+ *    - rotate
+ *    - rotated
+ *
+ * @author Achintya Akula - 30099 OmicronX
+ * @author Sohum Arora
+ * @author Topher Fontana - 23571 jEdison Knights
  */
 data class Pose(
     @get:JvmName("x") var x: Double = 0.0,
@@ -18,67 +45,230 @@ data class Pose(
     private var _coordSystem: CoordinateSystem = ApexCoordinates
 ) {
     @get:JvmName("coordinateSystem")
-    val coordSystem get() = _coordSystem
+    val coordSystem
+        get() = _coordSystem
 
+    /**
+     * Calculates the distance to another pose
+     * Exactly the same as distanceFrom() however is included for user flexibility
+     *
+     * @return the distance to another pose
+     */
     infix fun distanceTo(otherPose: Pose): Double = sqrt(distanceSquaredFrom(otherPose))
+
+    /**
+     * Calculates the distance from another pose to this pose
+     * Exactly the same as distanceTo() however is included for user flexibility
+     *
+     * @return the distance from another pose
+     */
     infix fun distanceFrom(otherPose: Pose): Double = distanceTo(otherPose)
 
+    /**
+     * Calculates the squared distance between one pose and another pose
+     *
+     * @return the squared distance to another pose
+     */
     fun distanceSquaredFrom(otherPose: Pose): Double {
         val deltaX = otherPose.x - this.x
         val deltaY = otherPose.y - this.y
         return deltaX * deltaX + deltaY * deltaY
     }
 
+    /**
+     * Converts the pose to a vector
+     *
+     * @return the vector form of the current pose
+     */
     fun asVector(): Vector = Vector(x, y)
 
+    /**
+     * Converts this pose to a specified coordinate system
+     *
+     * @param coordSys the coordinate system to convert to
+     * @return the pose converted to the specified coordinate system
+     */
     fun inCoordinateSystem(coordSys: CoordinateSystem) =
         coordSys.fromApexCoordinates(this.coordSystem.toApexCoordinates(this))
 
+    /**
+     * Adds this pose and another pose together
+     * Converts all to the same coordinate system
+     *
+     * @param otherPose the pose to be added
+     * @return the resulting sum as a pose
+     */
     operator fun plus(otherPose: Pose): Pose {
-        val converted = otherPose.inCoordinateSystem(coordSystem)
-        return Pose(x + converted.x, y + converted.y, heading + converted.heading, coordSystem)
+        val otherPose = otherPose.inCoordinateSystem(coordSystem)
+        return Pose(
+            x + otherPose.x,
+            y + otherPose.y,
+            heading + otherPose.heading,
+            coordSystem
+        )
     }
 
-    operator fun plus(vec: Vector) = this + vec.asPose()
+    /**
+     * Adds a vector to this pose
+     *
+     * @param vec the vector to be added
+     * @return the resulting sum as a pose
+     */
+    operator fun plus(vec: Vector) =
+        this + vec.asPose()
 
+    /**
+     * Subtracts another pose from this pose
+     *
+     * @param otherPose the pose to be subtracted
+     * @return the resulting difference as a pose
+     */
     operator fun minus(otherPose: Pose): Pose {
-        val converted = otherPose.inCoordinateSystem(coordSystem)
-        return Pose(x - converted.x, y - converted.y, heading - converted.heading, coordSystem)
+        val otherPose = otherPose.inCoordinateSystem(coordSystem)
+        return Pose(
+            x - otherPose.x,
+            y - otherPose.y,
+            heading - otherPose.heading,
+            coordSystem
+        )
     }
 
-    operator fun minus(vec: Vector) = this - vec.asPose()
+    /**
+     * Subtracts a vector from this pose
+     *
+     * @param vec the vector to be subtracted
+     * @return the resulting difference as a pose
+     */
+    operator fun minus(vec: Vector) =
+        this - vec.asPose()
 
-    operator fun times(scalar: Double) = Pose(x * scalar, y * scalar, heading, coordSystem)
-    operator fun div(scalar: Double) = Pose(x / scalar, y / scalar, heading, coordSystem)
-    operator fun unaryMinus() = Pose(-x, -y, -heading, coordSystem)
+    /**
+     * Multiplies the x-y values by a certain amount
+     *
+     * @param scalar the scale factor to multiply by
+     * @return the scaled pose
+     */
+    operator fun times(scalar: Double) =
+        Pose(
+            x * scalar,
+            y * scalar,
+            heading,
+            coordSystem
+        )
+    /**
+     * Divides the x-y values by a certain amount
+     *
+     * @param scalar the scale factor to divide by
+     * @return the scaled pose
+     */
+    operator fun div(scalar: Double) =
+        Pose(
+            x / scalar,
+            y / scalar,
+            heading,
+            coordSystem
+        )
 
-    fun reflectX(at: Double) = apply {
-        y = 2 * at - y
-        heading = normalize(-heading)
-    }
+    /**
+     * Negates the x-y values, and negates the heading as well
+     *
+     * @return negated form of this pose
+     */
+    operator fun unaryMinus() =
+        Pose(
+            x * -1,
+            y * -1,
+            heading * -1,
+            coordSystem
+        )
 
-    fun withReflectedX(at: Double) = Pose(x, 2 * at - y, normalize(-heading), coordSystem)
+    /**
+     * Function to reflect a pose over (y = at)
+     * Applies reflection to current pose
+     *
+     * @param at A [Double] that we can flip the pose over (y = at)
+     * @return The reflected [Pose] that has been reflected over a x-axis parallel line
+     */
+    fun reflectX(at: Double) =
+        apply {
+            y = 2 * at - y
+            heading = normalize(-heading)
+        }
 
-    fun reflectY(at: Double) = apply {
-        x = 2 * at - x
-        heading = normalize(PI - heading)
-    }
+    /**
+     * Function to reflect a pose over (y = at)
+     * Creates a new pose with reflected coordinates
+     *
+     * @param at A [Double] that we can flip the pose over (y = at)
+     * @return A [Pose] that is the reflection of this pose over a x-axis parallel line
+     */
+    fun withReflectedX(at: Double) =
+        Pose(
+            x,
+            2 * at - y,
+            normalize(-heading),
+            coordSystem
+        )
 
-    fun withReflectedY(at: Double) = Pose(2 * at - x, y, normalize(PI - heading), coordSystem)
+    /**
+     * Function to reflect a pose over (x = at)
+     * Applies reflection to current pose
+     *
+     * @param at A [Double] that we can flip the pose over (x = at)
+     * @return The reflected [Pose] that has been reflected over a y-axis parallel line
+     */
+    fun reflectY(at: Double) =
+        apply {
+            x = 2 * at - x
+            heading = normalize(PI - heading)
+        }
 
-    fun rotate(theta: Double, headingTheta: Double = theta) = apply {
-        val origX = x
-        x = origX * cos(theta) - y * sin(theta)
-        y = origX * sin(theta) + y * cos(theta)
-        heading += headingTheta
-    }
+    /**
+     * Function to reflect a pose over (x = at)
+     * Creates a new pose with reflected coordinates
+     *
+     * @param at A [Double] that we can flip the pose over (x = at)
+     * @return A [Pose] that is the reflection of this pose over the y-axis parallel line
+     */
+    fun withReflectedY(at: Double) =
+        Pose(
+            2 * at - x,
+            y,
+            normalize(PI - heading),
+            coordSystem
+        )
 
-    fun rotated(theta: Double, headingTheta: Double = theta) = Pose(
-        x * cos(theta) - y * sin(theta),
-        x * sin(theta) + y * cos(theta),
-        heading + headingTheta,
-        coordSystem
-    )
+    /**
+     * Function to rotate a pose around the origin by an angle theta
+     * Applies the rotation to the original pose
+     *
+     * @param theta The angle to rotate the position by
+     * @param headingTheta The amount to rotate heading by, equals theta if not specified
+     * @return The pose after rotation has been applied to it
+     */
+    fun rotate(theta: Double, headingTheta: Double = theta) =
+        apply {
+            x = x * cos(theta) - y * sin(theta)
+            y = x * sin(theta) + y * cos(theta)
+            heading = heading + headingTheta
+        }
+
+    /**
+     * Function to rotate a pose around the origin by an angle theta
+     * Returns a new pose that is the rotated form of the original pose
+     *
+     * @param theta The angle to rotate the position by
+     * @param headingTheta The amount to rotate heading by, equals theta if not specified
+     * @return A new pose that is the rotated form of the current one
+     */
+    fun rotated(theta: Double, headingTheta: Double = theta) =
+        Pose(
+            x * cos(theta) - y * sin(theta),
+            x * sin(theta) + y * cos(theta),
+            heading + headingTheta,
+            coordSystem
+        )
+
 
     fun normalize(angle: Double): Double {
         var a = angle % (2 * PI)
