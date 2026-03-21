@@ -1,4 +1,5 @@
 @file:Suppress("unused")
+
 package com.apexpathing.util.math
 
 import com.apexpathing.geometry.Vector
@@ -31,12 +32,14 @@ import kotlin.math.sqrt
  * @author Sohum Arora
  * @author Topher Fontana - 23571 jEdison Knights
  */
-data class Pose(
-    @get:JvmName("x") var x: Double = 0.0,
-    @get:JvmName("y") var y: Double = 0.0,
-    @get:JvmName("heading") var heading: Double = 0.0,
-    private var _coordSystem: CoordinateSystem = ApexCoordinates
-) {
+data class Pose
+    @JvmOverloads constructor(
+        @get:JvmName("x") var x: Double = 0.0,
+        @get:JvmName("y") var y: Double = 0.0,
+        @get:JvmName("heading") var heading: Double = 0.0,
+        private var _coordSystem: CoordinateSystem = ApexCoordinates
+    )
+{
     @get:JvmName("coordinateSystem")
     val coordSystem
         get() = _coordSystem
@@ -182,7 +185,8 @@ data class Pose(
      * @param at A [Double] that we can flip the pose over (y = at)
      * @return The reflected [Pose] that has been reflected over a x-axis parallel line
      */
-    fun reflectX(at: Double) =
+    @JvmOverloads()
+    fun reflectX(at: Double = 0.0) =
         apply {
             y = 2 * at - y
             heading = normalize(-heading)
@@ -195,7 +199,8 @@ data class Pose(
      * @param at A [Double] that we can flip the pose over (y = at)
      * @return A [Pose] that is the reflection of this pose over a x-axis parallel line
      */
-    fun withReflectedX(at: Double) =
+    @JvmOverloads()
+    fun withReflectedX(at: Double = 0.0) =
         Pose(
             x,
             2 * at - y,
@@ -210,7 +215,8 @@ data class Pose(
      * @param at A [Double] that we can flip the pose over (x = at)
      * @return The reflected [Pose] that has been reflected over a y-axis parallel line
      */
-    fun reflectY(at: Double) =
+    @JvmOverloads()
+    fun reflectY(at: Double = 0.0) =
         apply {
             x = 2 * at - x
             heading = normalize(PI - heading)
@@ -223,7 +229,8 @@ data class Pose(
      * @param at A [Double] that we can flip the pose over (x = at)
      * @return A [Pose] that is the reflection of this pose over the y-axis parallel line
      */
-    fun withReflectedY(at: Double) =
+    @JvmOverloads()
+    fun withReflectedY(at: Double = 0.0) =
         Pose(
             2 * at - x,
             y,
@@ -239,6 +246,7 @@ data class Pose(
      * @param headingTheta The amount to rotate heading by, equals theta if not specified
      * @return The pose after rotation has been applied to it
      */
+    @JvmOverloads()
     fun rotate(theta: Double, headingTheta: Double = theta) =
         apply {
             x = x * cos(theta) - y * sin(theta)
@@ -254,6 +262,7 @@ data class Pose(
      * @param headingTheta The amount to rotate heading by, equals theta if not specified
      * @return A new pose that is the rotated form of the current one
      */
+    @JvmOverloads()
     fun rotated(theta: Double, headingTheta: Double = theta) =
         Pose(
             x * cos(theta) - y * sin(theta),

@@ -4,8 +4,17 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 import com.apexpathing.geometry.Vector2d;
 import com.apexpathing.follower.QuinticHermiteSpline;
+import com.apexpathing.util.math.Pose;
 
 public class ApexPathingTest {
+
+    @Test
+    public void testPoseFunctions() {
+        Pose myTestPose = new Pose(10.0, 10.0);
+        assertEquals(10.0, myTestPose.withReflectedY().y(), 0.0);
+        assertEquals(-10.0, myTestPose.withReflectedY().x(), 0.0);
+    }
+
     @Test
     public void testVectorMath() {
         Vector2d v1 = new Vector2d(1, 2);
