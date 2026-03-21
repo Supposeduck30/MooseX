@@ -1,3 +1,9 @@
+@file:Suppress("unused")
+
+/**
+ * @author Achintya Akula, Sohum Arora, Topher Fontana
+ */
+
 package com.xpathing.util.math
 
 
@@ -11,7 +17,7 @@ data class Pose(
     @get:JvmName("x") var x: Double = 0.0,
     @get:JvmName("y") var y: Double = 0.0,
     @get:JvmName("heading") var heading: Double = 0.0,
-    private var _coordSystem: CoordinateSystem
+    private var _coordSystem: CoordinateSystem = ApexCoordinates
 ) {
     @get:JvmName("coordinateSystem")
     val coordSystem
@@ -68,7 +74,7 @@ data class Pose(
      * @return the resulting sum as a pose
      */
     operator fun plus(otherPose: Pose): Pose {
-        val otherPose = otherPose
+        val otherPose = otherPose.inCoordinateSystem(coordSystem)
         return Pose(
             x + otherPose.x,
             y + otherPose.y,
@@ -83,7 +89,8 @@ data class Pose(
      * @param vec the vector to be added
      * @return the resulting sum as a pose
      */
-    operator fun plus(vec: Vector) = this + vec.asPose()
+    operator fun plus(vec: Vector) =
+        this + vec.asPose()
 
     /**
      * Subtracts another pose from this pose
@@ -92,7 +99,7 @@ data class Pose(
      * @return the resulting difference as a pose
      */
     operator fun minus(otherPose: Pose): Pose {
-        val otherPose = otherPose
+        val otherPose = otherPose.inCoordinateSystem(coordSystem)
         return Pose(
             x - otherPose.x,
             y - otherPose.y,
@@ -107,7 +114,8 @@ data class Pose(
      * @param vec the vector to be subtracted
      * @return the resulting difference as a pose
      */
-    operator fun minus(vec: Vector) = this - vec.asPose()
+    operator fun minus(vec: Vector) =
+        this - vec.asPose()
 
     /**
      * Multiplies the x-y values by a certain amount
@@ -115,90 +123,133 @@ data class Pose(
      * @param scalar the scale factor to multiply by
      * @return the scaled pose
      */
-    operator fun times(scalar: Double) = apply {
-        x *= scalar
-        y *= scalar
-    }
-
+    operator fun times(scalar: Double) =
+        Pose(
+            x * scalar,
+            y * scalar,
+            heading,
+            coordSystem
+        )
     /**
      * Divides the x-y values by a certain amount
      *
      * @param scalar the scale factor to divide by
      * @return the scaled pose
      */
-    operator fun div(scalar: Double) = apply {
-        x /= scalar
-        y /= scalar
-    }
+    operator fun div(scalar: Double) =
+        Pose(
+            x / scalar,
+            y / scalar,
+            heading,
+            coordSystem
+        )
 
     /**
      * Negates the x-y values, and negates the heading as well
      *
      * @return negated form of this pose
      */
-    operator fun unaryMinus() = apply {
-        x *= -1
-        y *= -1
-        heading *= -1
-    }
-    fun copyPose(): Pose = Pose(x, y, heading, Vector.coordSys)
+    operator fun unaryMinus() =
+        Pose(
+            x * -1,
+            y * -1,
+            heading * -1,
+            coordSystem
+        )
 
     /**
-    *@param at A [Double] that we can flip the pose over (y = at)
-    *@return A [Pose] that contains the reflection of the pose over the x-axis parallel line
-    */
-    fun reflectX(at: Double) = apply {
-        y = 2 * at - y
-        heading = normalize(-heading)
-    }
+     * Function to reflect a pose over (y = at)
+     * Applies reflection to current pose
+     *
+     * @param at A [Double] that we can flip the pose over (y = at)
+     * @return The reflected [Pose] that has been reflected over a x-axis parallel line
+     */
+    fun reflectX(at: Double) =
+        apply {
+            y = 2 * at - y
+            heading = normalize(-heading)
+        }
 
     /**
-    *@param at A [Double] that we can flip the pose over (x = at)
-    *@return A [Pose] that contains the reflection of the pose over the y-axis parallel line
-    */
-    fun reflectY(at: Double) = apply {
-        x = 2 * at - x
-        heading = normalize(PI - heading)
-    }
+     * Function to reflect a pose over (y = at)
+     * Creates a new pose with reflected coordinates
+     *
+     * @param at A [Double] that we can flip the pose over (y = at)
+     * @return A [Pose] that is the reflection of this pose over a x-axis parallel line
+     */
+    fun withReflectedX(at: Double) =
+        Pose(
+            x,
+            2 * at - y,
+            normalize(-heading),
+            coordSystem
+        )
 
     /**
-    *@param at A [Double] offset for the line y = x + at
-    *@return A [Pose] that contains the reflection of the pose over the line y = x + at
-    */
-    fun reflectYX(at: Double): Pose {
-        val oldX = x
-        x = y - at
-        y = oldX + at
-        heading = normalize(PI / 2.0 - heading)
-        return this
-    }
+     * Function to reflect a pose over (x = at)
+     * Applies reflection to current pose
+     *
+     * @param at A [Double] that we can flip the pose over (x = at)
+     * @return The reflected [Pose] that has been reflected over a y-axis parallel line
+     */
+    fun reflectY(at: Double) =
+        apply {
+            x = 2 * at - x
+            heading = normalize(PI - heading)
+        }
+
+    /**
+     * Function to reflect a pose over (x = at)
+     * Creates a new pose with reflected coordinates
+     *
+     * @param at A [Double] that we can flip the pose over (x = at)
+     * @return A [Pose] that is the reflection of this pose over the y-axis parallel line
+     */
+    fun withReflectedY(at: Double) =
+        Pose(
+            2 * at - x,
+            y,
+            normalize(PI - heading),
+            coordSystem
+        )
+
+    /**
+     * Function to rotate a pose around the origin by an angle theta
+     * Applies the rotation to the original pose
+     *
+     * @param theta The angle to rotate the position by
+     * @param headingTheta The amount to rotate heading by, equals theta if not specified
+     * @return The pose after rotation has been applied to it
+     */
+    fun rotate(theta: Double, headingTheta: Double = theta) =
+        apply {
+            x = x * cos(theta) - y * sin(theta)
+            y = x * sin(theta) + y * cos(theta)
+            heading = heading + headingTheta
+        }
+
+    /**
+     * Function to rotate a pose around the origin by an angle theta
+     * Returns a new pose that is the rotated form of the original pose
+     *
+     * @param theta The angle to rotate the position by
+     * @param headingTheta The amount to rotate heading by, equals theta if not specified
+     * @return A new pose that is the rotated form of the current one
+     */
+    fun rotated(theta: Double, headingTheta: Double = theta) =
+        Pose(
+            x * cos(theta) - y * sin(theta),
+            x * sin(theta) + y * cos(theta),
+            heading + headingTheta,
+            coordSystem
+        )
+
 
     fun normalize(angle: Double): Double {
         var a = angle % (2 * PI)
         if (a > PI) a -= 2 * PI
         if (a <= -PI) a += 2 * PI
         return a
-
-    }
-    fun rotate(angle: Double): Pose {
-        val cosA = cos(angle)
-        val sinA = sin(angle)
-        return Pose(
-            x * cosA - y * sinA,
-            x * sinA + y * cosA,
-            normalize(heading + angle),
-            _coordSystem = Vector.coordSys
-        )
-    }
-    object coordSys : CoordinateSystem {
-        override fun toApexCoordinates(pose: Pose): Pose {
-            TODO("Not yet implemented")
-        }
-
-        override fun fromApexCoordinates(pose: Pose): Pose {
-            TODO("Not yet implemented")
-        }
-
     }
 }
 
