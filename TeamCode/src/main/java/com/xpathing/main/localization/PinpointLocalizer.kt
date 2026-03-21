@@ -1,22 +1,27 @@
+
 package com.xpathing.main.localization
 
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver
 import com.qualcomm.robotcore.hardware.HardwareMap
-import com.xpathing.util.math.Pose
+
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D
+import com.xpathing.util.math.Pose;
+import com.xpathing.util.math.Vector
 
 @Localizer
 object PinpointLocalizer : LocalizerBase() {
 
     private lateinit var pinpoint: GoBildaPinpointDriver
+
     lateinit var hardwareMap: HardwareMap
 
     var xOffset: Double = 0.0
     var yOffset: Double = 0.0
 
     override fun initLocalizer(deviceName : String) {
+
         pinpoint = hardwareMap.get(GoBildaPinpointDriver::class.java, deviceName)
         pinpoint.setOffsets(xOffset, yOffset, DistanceUnit.INCH)
         pinpoint.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD)
@@ -27,6 +32,8 @@ object PinpointLocalizer : LocalizerBase() {
         pinpoint.resetPosAndIMU()
     }
 
+
+
     override fun update() {
         pinpoint.update()
         val pos = pinpoint.position
@@ -36,7 +43,8 @@ object PinpointLocalizer : LocalizerBase() {
         currentPosition = Pose(
             pos.getX(DistanceUnit.INCH),
             pos.getY(DistanceUnit.INCH),
-            pinpoint.getHeading(AngleUnit.RADIANS)
+            pinpoint.getHeading(AngleUnit.RADIANS),
+            _coordSystem = Vector.coordSys
         )
 
         updateKinematics()
