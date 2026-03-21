@@ -116,6 +116,7 @@ classDiagram
     Localizer <--* PoseTracker : External Affairs.
 ```
 
+<!--
 ## Higher Level Core Hierarchy
 ```mermaid
 graph Core
@@ -125,3 +126,4 @@ graph Core
         TK[Tank Drivetrain]
         SW[Swerve Drivetrain]
 ```
+-->

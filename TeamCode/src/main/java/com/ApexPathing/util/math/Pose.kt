@@ -1,11 +1,10 @@
-@file:Suppress("unused")
+@file:Suppress("unused", "PackageName")
 
 /**
  * @author Achintya Akula, Sohum Arora, Topher Fontana
  */
 
-package com.xpathing.util.math
-
+package com.ApexPathing.util.math
 
 import kotlin.math.PI
 import kotlin.math.cos

@@ -1,5 +1,6 @@
 package com.ApexPathing.util.math
 
+import com.xpathing.util.math.Pose
 import kotlin.math.PI
 
 interface CoordinateSystem {
