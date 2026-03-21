@@ -46,6 +46,10 @@ public class Vector2d {
         return x * other.x + y * other.y;
     }
 
+    public double distanceTo(Vector2d other) {
+        return Math.hypot(x - other.x, y - other.y);
+    }
+
     @Override
     public String toString() {
         return String.format("Vector2d(x=%.3f, y=%.3f)", x, y);

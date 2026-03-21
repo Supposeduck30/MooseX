@@ -6,6 +6,7 @@ repositories {
 }
 
 dependencies {
+    implementation 'com.bylazar:fullpanels:1.0.12'
     implementation 'org.firstinspires.ftc:Inspection:11.1.0'
     implementation 'org.firstinspires.ftc:Blocks:11.1.0'
     implementation 'org.firstinspires.ftc:RobotCore:11.1.0'

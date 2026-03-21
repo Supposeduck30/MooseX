@@ -1,9 +1,8 @@
-<<<<<<< HEAD
 package com.xpathing.main.localization
 
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver
 import com.qualcomm.robotcore.hardware.HardwareMap
-import com.xpathing.main.follower.paths.Pose
+import com.xpathing.util.math.Pose
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D
@@ -57,26 +56,3 @@ object PinpointLocalizer : LocalizerBase() {
         )
     }
 }
-=======
-import com.qualcomm.robotcore.hardware.HardwareMap
-import com.xpathing.main.localization.Localizer
-import com.xpathing.main.localization.LocalizerBase
-import com.xpathing.util.math.Pose
-
-// Imports
-@Localizer
-
-object PinpointLocalizer: LocalizerBase() {
-    // Figure out how to get the hardware map in without having to pass it in as a parameter
-
-    lateinit var hardwareMap: HardwareMap
-
-    override fun update() {
-        // Figure out the math to get pinpoint pose
-    }
-
-    override fun setPose(pose: Pose) {
-        TODO("Not yet implemented")
-    }
-}
->>>>>>> 76fcf68cfb766210971a5f09e054adc7cb309329

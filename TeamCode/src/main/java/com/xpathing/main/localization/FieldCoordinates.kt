@@ -1,6 +1,6 @@
 package com.xpathing.main.localization
 
-import com.xpathing.main.follower.paths.Pose
+import com.xpathing.util.math.Pose
 
 
 object FieldCoordinates {

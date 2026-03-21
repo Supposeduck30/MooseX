@@ -1,6 +1,6 @@
 package org.firstinspires.ftc.teamcode.movement.hardware;
 
-import com.acmerobotics.dashboard.config.Config;
+// import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.MotorControlAlgorithm;
@@ -14,7 +14,7 @@ import org.firstinspires.ftc.teamcode.movement.util.SlewRateLimiter;
 /**
  * Enhanced DcMotorEx wrapper with power caching and slew rate limiting.
  */
-@Config
+// @Config
 public class MotorEx implements DcMotorEx {
     public static double POWER_CACHE_THRESHOLD = 0.005;
 

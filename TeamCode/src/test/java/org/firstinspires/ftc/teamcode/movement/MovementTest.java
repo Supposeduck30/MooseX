@@ -3,7 +3,7 @@ package org.firstinspires.ftc.teamcode.movement;
 import static org.junit.Assert.*;
 import org.junit.Test;
 import org.firstinspires.ftc.teamcode.movement.geometry.Vector2d;
-import org.firstinspires.ftc.teamcode.movement.pathing.BezierCurve;
+import com.xpathing.main.follower.xpathing.QuinticHermiteSpline;
 import java.util.Arrays;
 
 public class MovementTest {
@@ -22,28 +22,31 @@ public class MovementTest {
     }
 
     @Test
-    public void testBezierCurve() {
+    public void testQuinticHermiteSpline() {
         Vector2d p0 = new Vector2d(0, 0);
-        Vector2d p1 = new Vector2d(1, 0);
-        Vector2d p2 = new Vector2d(1, 1);
-        BezierCurve curve = new BezierCurve(Arrays.asList(p0, p1, p2));
+        Vector2d v0 = new Vector2d(1, 0);
+        Vector2d a0 = new Vector2d(0, 0);
 
-        Vector2d start = curve.getPoint(0);
+        Vector2d p1 = new Vector2d(1, 1);
+        Vector2d v1 = new Vector2d(0, 1);
+        Vector2d a1 = new Vector2d(0, 0);
+
+        QuinticHermiteSpline spline = new QuinticHermiteSpline(p0, v0, a0, p1, v1, a1);
+
+        Vector2d start = spline.getPoint(0);
         assertEquals(0, start.x, 1e-9);
         assertEquals(0, start.y, 1e-9);
 
-        Vector2d end = curve.getPoint(1);
+        Vector2d end = spline.getPoint(1);
         assertEquals(1, end.x, 1e-9);
         assertEquals(1, end.y, 1e-9);
 
-        // Derivative at t=0 should be n*(p1-p0) = 2*(1,0) = (2,0)
-        Vector2d d0 = curve.getDerivative(0);
-        assertEquals(2, d0.x, 1e-9);
-        assertEquals(0, d0.y, 1e-9);
+        Vector2d startVel = spline.getVelocity(0);
+        assertEquals(1, startVel.x, 1e-9);
+        assertEquals(0, startVel.y, 1e-9);
 
-        // Derivative at t=1 should be n*(p2-p1) = 2*(0,1) = (0,2)
-        Vector2d d1 = curve.getDerivative(1);
-        assertEquals(0, d1.x, 1e-9);
-        assertEquals(2, d1.y, 1e-9);
+        Vector2d endVel = spline.getVelocity(1);
+        assertEquals(0, endVel.x, 1e-9);
+        assertEquals(1, endVel.y, 1e-9);
     }
 }
