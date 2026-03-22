@@ -4,7 +4,6 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 /**
  * PIDF feedback controller.
- * @author Xander Haemel -31616
  */
 public class PIDFController {
     public double kP, kI, kD, kF;
@@ -15,7 +14,6 @@ public class PIDFController {
     private double error;
     private double lastTimestamp = 0;
     private final ElapsedTime timer;
-    private double motorDeadzone = 0.05;
 
     public PIDFController(double kP, double kI, double kD, double kF) {
         this.kP = kP;
@@ -54,15 +52,11 @@ public class PIDFController {
         derivative = (error - lastError) / deltaTime;
         double kDOut = kD * derivative;
 
-        double kFOut = kF * Math.signum(error);
+        double kFOut = kF * goal;
 
         lastTimestamp = timestamp;
         lastError = error;
 
-        double power = kPOut + kIOut + kDOut + kFOut;
-        if(Math.abs(power) < motorDeadzone){
-            power = 0;
-        }
-        return Math.max(-1.0, Math.min(1.0, power));
+        return kPOut + kIOut + kDOut + kFOut;
     }
 }

@@ -3,25 +3,26 @@ package com.apexpathing.util;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 /**
- * PIDF feedback controller.
- * @author Xander Haemel -31616
+ * A squID controller for follower
+ * It takes the square root of the P, but otherwise it's pretty normal for a controller
+ * @author Xander Haemel - 31616
  */
-public class PIDFController {
-    public double kP, kI, kD, kF;
+public class SquidController {
+    public double kP, kI, kD;
     public double goal = 0;
     private double integralSum = 0;
     private double derivative;
     private double lastError = 0;
-    private double error;
-    private double lastTimestamp = 0;
-    private final ElapsedTime timer;
+    private double error = 0;
     private double motorDeadzone = 0.05;
 
-    public PIDFController(double kP, double kI, double kD, double kF) {
+    private double lastTimestamp = 0;
+    private final ElapsedTime timer;
+
+    public SquidController(double kP, double kI, double kD) {
         this.kP = kP;
         this.kI = kI;
         this.kD = kD;
-        this.kF = kF;
         timer = new ElapsedTime();
         timer.startTime();
     }
@@ -41,10 +42,12 @@ public class PIDFController {
 
         if (deltaTime == 0) return 0;
 
+        //p term, but its special because its a square root
         error = goal - currentPosition;
+        //absolute value in case the error is negative, math.signum ensures the robot goes the right way
+        double kPOut = kP * Math.sqrt(Math.abs(error)) * Math.signum(error);
 
-        double kPOut = kP * error;
-
+        //i term, standard PID calculations
         integralSum += error * deltaTime;
         double iLimit = 0.25;
         if (integralSum > iLimit) integralSum = iLimit;
@@ -54,15 +57,19 @@ public class PIDFController {
         derivative = (error - lastError) / deltaTime;
         double kDOut = kD * derivative;
 
-        double kFOut = kF * Math.signum(error);
-
+        //reset vars
         lastTimestamp = timestamp;
         lastError = error;
 
-        double power = kPOut + kIOut + kDOut + kFOut;
+        //power variable for ease of calculation
+        final double power = kPOut + kIOut + kDOut;
+
+        //deadband, turns the motors off when the power is too slow to move the robot
         if(Math.abs(power) < motorDeadzone){
-            power = 0;
+            return 0;
         }
+
+        //limit power to -1, and 1 for safety
         return Math.max(-1.0, Math.min(1.0, power));
     }
 }
