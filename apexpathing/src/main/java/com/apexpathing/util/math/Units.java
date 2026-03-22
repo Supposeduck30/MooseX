@@ -4,16 +4,16 @@ public class Units {
     public enum DistanceUnits {
         INCHES,
         CENTIMETRES,
-        METRES,
-        MILLIMETRES,
+        METERS,
+        MILLIMETERS,
         FEET
     }
     public static double toInches(DistanceUnits unit, double value) {
         switch (unit) {
             case INCHES: return value;
-            case CENTIMETRES: return value / 2.54;
+            case CENTIMETERS: return value / 2.54;
             case METRES: return value / 0.0254;
-            case MILLIMETRES: return value / 25.4;
+            case MILLIMETERS: return value / 25.4;
             case FEET: return value * 12;
             default: return value;
         }
@@ -23,8 +23,8 @@ public class Units {
         switch (unit) {
             case METRES: return value;
             case INCHES: return value * 0.0254;
-            case CENTIMETRES: return value / 100;
-            case MILLIMETRES: return value / 1000;
+            case CENTIMETERS: return value / 100;
+            case MILLIMETERS: return value / 1000;
             case FEET: return value * 0.3048;
             default: return value;
         }
@@ -32,10 +32,10 @@ public class Units {
 
     public static double toCentimetres(DistanceUnits unit, double value) {
         switch (unit) {
-            case CENTIMETRES: return value;
+            case CENTIMETERS: return value;
             case INCHES: return value * 2.54;
-            case METRES: return value * 100;
-            case MILLIMETRES: return value / 10;
+            case METERS: return value * 100;
+            case MILLIMETERS: return value / 10;
             case FEET: return value * 30.48;
             default: return value;
         }
@@ -43,10 +43,10 @@ public class Units {
 
     public static double toMillimetres(DistanceUnits unit, double value) {
         switch (unit) {
-            case MILLIMETRES: return value;
+            case MILLIMETERS: return value;
             case INCHES: return value * 25.4;
-            case METRES: return value * 1000;
-            case CENTIMETRES: return value * 10;
+            case METERS: return value * 1000;
+            case CENTIMETERS: return value * 10;
             case FEET: return value * 304.8;
             default: return value;
         }
@@ -56,9 +56,9 @@ public class Units {
         switch (unit) {
             case FEET: return value;
             case INCHES: return value / 12;
-            case METRES: return value / 0.3048;
-            case CENTIMETRES: return value / 30.48;
-            case MILLIMETRES: return value / 304.8;
+            case METERS: return value / 0.3048;
+            case CENTIMETERS: return value / 30.48;
+            case MILLIMETERS: return value / 304.8;
             default: return value;
         }
 
