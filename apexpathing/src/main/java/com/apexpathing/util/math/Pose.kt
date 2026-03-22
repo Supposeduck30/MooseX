@@ -2,7 +2,6 @@
 
 package com.apexpathing.util.math
 
-import com.apexpathing.geometry.Vector
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
@@ -271,14 +270,6 @@ data class Pose
             coordSystem
         )
 
-
-    fun normalize(angle: Double): Double {
-        var a = angle % (2 * PI)
-        if (a > PI) a -= 2 * PI
-        if (a <= -PI) a += 2 * PI
-        return a
-    }
-
     /**
      * Function to convert the position to a string for easy viewing
      *
@@ -300,3 +291,9 @@ data class Pose
  *
  * At some point, extract the normalize function to a separate object that contains a bunch of Math Functions
  */
+fun normalize(angle: Double): Double {
+    var a = angle % (2 * PI)
+    if (a > PI) a -= 2 * PI
+    if (a <= -PI) a += 2 * PI
+    return a
+}
