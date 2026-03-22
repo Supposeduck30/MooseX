@@ -1,6 +1,6 @@
 package com.apexpathing.localization;
 
-import com.apexpathing.geometry.Pose2d;
+import com.apexpathing.util.math.Pose;
 
 /**
  * FTC field coordinate constants and utilities.
@@ -15,11 +15,11 @@ public class FieldCoordinates {
     public static final double MAX_Y = HALF_FIELD;
     public static final double MIN_Y = -HALF_FIELD;
 
-    public static Pose2d clamp(Pose2d pose) {
-        return new Pose2d(
-            Math.max(MIN_X, Math.min(MAX_X, pose.x)),
-            Math.max(MIN_Y, Math.min(MAX_Y, pose.y)),
-            pose.heading
+    public static Pose clamp(Pose pose) {
+        return new Pose(
+            Math.max(MIN_X, Math.min(MAX_X, pose.x())),
+            Math.max(MIN_Y, Math.min(MAX_Y, pose.y())),
+            pose.heading()
         );
     }
 }

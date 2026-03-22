@@ -1,6 +1,6 @@
 package com.apexpathing.localization;
 
-import com.apexpathing.geometry.Pose2d;
+import com.apexpathing.util.math.Pose;
 
 /**
  * Localizer interface for tracking the robot's pose and velocity.
@@ -14,15 +14,15 @@ public interface Localizer {
     /**
      * Returns the current estimated pose.
      */
-    Pose2d getPose();
+    Pose getPose();
 
     /**
      * Returns the current estimated velocity.
      */
-    Pose2d getVelocity();
+    Pose getVelocity();
 
     /**
      * Sets the current pose estimate.
      */
-    void setPose(Pose2d pose);
+    void setPose(Pose pose);
 }

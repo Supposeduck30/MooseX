@@ -26,7 +26,7 @@ Replace `TAG` with a release tag or commit hash.
 
 | Package | Contents |
 |---|---|
-| `com.apexpathing.geometry` | Pose2d, Vector2d |
+| `com.apexpathing.util.math` | Pose, Vector |
 | `com.apexpathing.kinematics` | ChassisSpeeds, Swerve/Mecanum/TankKinematics |
 | `com.apexpathing.follower` | HolonomicTrajectoryFollower, QuinticHermiteSpline, ArcLengthParameterizer |
 | `com.apexpathing.drivetrain` | CustomDrive, SwerveDrive, SwerveModule |
@@ -39,7 +39,7 @@ Replace `TAG` with a release tag or commit hash.
 ```java
 import com.apexpathing.drivetrain.SwerveDrive;
 import com.apexpathing.localization.PinpointLocalizer;
-import com.apexpathing.geometry.Vector2d;
+import com.apexpathing.util.math.Vector;
 ```
 
 ## License

@@ -10,7 +10,7 @@ public class MecanumConstants {
 
     private double[] convertToPolar = cartesianToPolar(xVelocity, -yVelocity);
 
-    public Vector frontLeftVector = new Vector(convertToPolar[0], convertToPolar[1]).normalize();
+    public Vector frontLeftVector = Vector.Companion.fromPolar(convertToPolar[0], convertToPolar[1]);
     public double maxPower = 1;
     public DcMotorSimple.Direction leftFrontMotorDirection = DcMotorSimple.Direction.REVERSE;
     public DcMotorSimple.Direction leftRearMotorDirection = DcMotorSimple.Direction.REVERSE;
@@ -111,7 +111,7 @@ public class MecanumConstants {
         xVelocity = 81.34056;
         yVelocity = 65.43028;
         convertToPolar = cartesianToPolar(xVelocity, -yVelocity);
-        frontLeftVector = new Vector(convertToPolar[0], convertToPolar[1]).normalize();
+        frontLeftVector = Vector.Companion.fromPolar(convertToPolar[0], convertToPolar[1]);
         maxPower = 1;
         leftFrontMotorDirection = DcMotorSimple.Direction.REVERSE;
         leftRearMotorDirection = DcMotorSimple.Direction.REVERSE;

@@ -1,8 +1,9 @@
 package com.apexpathing.follower;
 
-import com.apexpathing.geometry.Pose2d;
+import com.apexpathing.util.math.Pose;
 import com.apexpathing.kinematics.ChassisSpeeds;
 import com.apexpathing.kinematics.KinematicsSwitcher;
+import com.apexpathing.util.math.Vector;
 
 /**
  * A trajectory follower for holonomic robots (Mecanum, Swerve).
@@ -20,12 +21,13 @@ public class HolonomicTrajectoryFollower {
     public static double kA = 0.01; // Acceleration feedforward
     public static double kCentripetal = 0.005; // Centripetal compensation
 
-    private final KinematicsSwitcher kinematics;
-    private Pose2d lastError = new Pose2d(0, 0, 0);
+    private final Pose lastError = new Pose(0, 0, 0);
     private long lastTime = -1;
 
-    public HolonomicTrajectoryFollower(KinematicsSwitcher kinematics) {
-        this.kinematics = kinematics;
+    private final Vector fieldSpeedsBuffer = new Vector(0, 0);
+    private final ChassisSpeeds speedsBuffer = new ChassisSpeeds(new Vector(0, 0), 0);
+
+    public HolonomicTrajectoryFollower() {
     }
 
     /**
@@ -34,22 +36,24 @@ public class HolonomicTrajectoryFollower {
      * @param target The desired trajectory sample.
      * @return Output from the kinematics model (e.g., wheel speeds).
      */
-    public Object update(Pose2d currentPose, TrajectorySample target) {
+    public Object update(Pose currentPose, TrajectorySample target) {
         long currentTime = System.nanoTime();
         if (lastTime == -1) lastTime = currentTime;
         double dt = (currentTime - lastTime) / 1e9;
         lastTime = currentTime;
 
         // Decouple translation and rotation for PD calculation
-        double xError = target.pose.x - currentPose.x;
-        double yError = target.pose.y - currentPose.y;
-        double thetaError = normalizeAngle(target.pose.heading - currentPose.heading);
+        double xError = target.pose.x() - currentPose.x();
+        double yError = target.pose.y() - currentPose.y();
+        double thetaError = normalizeAngle(target.pose.heading() - currentPose.heading());
 
-        double dxError = (dt > 0) ? (xError - lastError.x) / dt : 0;
-        double dyError = (dt > 0) ? (yError - lastError.y) / dt : 0;
-        double dthetaError = (dt > 0) ? (thetaError - lastError.heading) / dt : 0;
+        double dxError = (dt > 0) ? (xError - lastError.x()) / dt : 0;
+        double dyError = (dt > 0) ? (yError - lastError.y()) / dt : 0;
+        double dthetaError = (dt > 0) ? (thetaError - lastError.heading()) / dt : 0;
 
-        lastError = new Pose2d(xError, yError, thetaError);
+        lastError.setX(xError);
+        lastError.setY(yError);
+        lastError.setHeading(thetaError);
 
         // PD Feedback
         double feedbackX = kPx * xError + kDx * dxError;
@@ -57,28 +61,30 @@ public class HolonomicTrajectoryFollower {
         double feedbackTheta = kPtheta * thetaError + kDtheta * dthetaError;
 
         // Feedforward
-        double feedforwardX = kV * target.velocity.x + kA * target.acceleration.x;
-        double feedforwardY = kV * target.velocity.y + kA * target.acceleration.y;
-        double feedforwardTheta = kV * target.velocity.heading + kA * target.acceleration.heading;
+        double feedforwardX = kV * target.velocity.x() + kA * target.acceleration.x();
+        double feedforwardY = kV * target.velocity.y() + kA * target.acceleration.y();
+        double feedforwardTheta = kV * target.velocity.heading() + kA * target.acceleration.heading();
 
         // Centripetal Force Compensation
-        double centripetalX = -kCentripetal * target.velocity.y * target.velocity.heading;
-        double centripetalY = kCentripetal * target.velocity.x * target.velocity.heading;
+        double centripetalX = -kCentripetal * target.velocity.y() * target.velocity.heading();
+        double centripetalY = kCentripetal * target.velocity.x() * target.velocity.heading();
 
-        // Total outputs in robot-relative frame
-        double cos = Math.cos(currentPose.heading);
-        double sin = Math.sin(currentPose.heading);
-
+        // Total outputs in world frame
         double worldVX = feedbackX + feedforwardX + centripetalX;
         double worldVY = feedbackY + feedforwardY + centripetalY;
 
-        // Transform world velocity to robot-relative velocity
-        double robotVX = worldVX * cos + worldVY * sin;
-        double robotVY = -worldVX * sin + worldVY * cos;
+        fieldSpeedsBuffer.setX(worldVX);
+        fieldSpeedsBuffer.setY(worldVY);
 
-        ChassisSpeeds targetSpeeds = new ChassisSpeeds(robotVX, robotVY, feedbackTheta + feedforwardTheta);
+        // Rotate fieldSpeedsBuffer to robot frame
+        // rotatedVec in Kotlin Vector class is mutating!
+        fieldSpeedsBuffer.rotatedVec(-currentPose.heading());
 
-        return kinematics.calculate(targetSpeeds);
+        speedsBuffer.translation.setX(fieldSpeedsBuffer.x());
+        speedsBuffer.translation.setY(fieldSpeedsBuffer.y());
+        speedsBuffer.omega = feedbackTheta + feedforwardTheta;
+
+        return KinematicsSwitcher.get().toWheelSpeeds(speedsBuffer);
     }
 
     private double normalizeAngle(double angle) {

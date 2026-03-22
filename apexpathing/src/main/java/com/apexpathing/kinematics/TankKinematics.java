@@ -1,24 +1,28 @@
 package com.apexpathing.kinematics;
 
 /**
- * Specialized TankKinematics class.
+ * Standard Tank drive inverse kinematics.
  */
-public class TankKinematics extends Kinematics {
+public class TankKinematics implements Kinematics {
     private final double trackWidth;
+    private final double[] wheelSpeeds = new double[2];
 
+    /**
+     * @param trackWidth Distance between left and right wheels.
+     */
     public TankKinematics(double trackWidth) {
         this.trackWidth = trackWidth;
     }
 
-    public double[] calculateWheelSpeeds(ChassisSpeeds chassisSpeeds) {
-        double leftSpeed = chassisSpeeds.vx - (trackWidth / 2.0) * chassisSpeeds.omega;
-        double rightSpeed = chassisSpeeds.vx + (trackWidth / 2.0) * chassisSpeeds.omega;
-
-        return new double[]{leftSpeed, rightSpeed};
-    }
-
     @Override
-    public double[] calculate(ChassisSpeeds chassisSpeeds) {
-        return calculateWheelSpeeds(chassisSpeeds);
+    public double[] toWheelSpeeds(ChassisSpeeds speeds) {
+        // Tank drive ignores Y velocity
+        double vx = speeds.translation.x();
+        double omega = speeds.omega;
+
+        wheelSpeeds[0] = vx - (trackWidth / 2.0) * omega;
+        wheelSpeeds[1] = vx + (trackWidth / 2.0) * omega;
+
+        return wheelSpeeds;
     }
 }

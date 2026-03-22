@@ -4,14 +4,13 @@
 
 ```
 com.apexpathing
-├── geometry/        Core math types (Pose2d, Vector2d, Vector)
 ├── kinematics/      Drivetrain kinematics (swerve, mecanum, tank)
 ├── follower/        Trajectory generation and following
 ├── drivetrain/      Drive system implementations
 ├── localization/    Position tracking (Localizer interface + implementations)
 ├── hardware/        FTC hardware wrappers (MotorEx, LynxModuleUtil)
 └── util/
-    ├── math/        Pose, CoordinateSystem (ApexCoordinates, PedroCoordinates)
+    ├── math/        Pose, Vector, CoordinateSystem (ApexCoordinates, PedroCoordinates)
     └── ...          Controllers and rate limiters
 ```
 
@@ -39,7 +38,7 @@ classDiagram
         <<abstract>>
         # localizer: Localizer
         # controller: HolonomicTrajectoryFollower
-        + setDrivePowers(Pose2d)
+        + setDrivePowers(Pose)
         + update()
         + followTrajectory(Trajectory)
     }
@@ -66,14 +65,14 @@ classDiagram
 ```mermaid
 classDiagram
     class KinematicsSwitcher {
-        <<interface>>
-        + calculate(ChassisSpeeds): Object
+        + setDriveType(Kinematics)
+        + get(): Kinematics
     }
     class Kinematics {
-        <<abstract>>
+        <<interface>>
+        + toWheelSpeeds(ChassisSpeeds): Object
     }
 
-    KinematicsSwitcher <|.. Kinematics
     Kinematics <|-- SwerveKinematics
     Kinematics <|-- MecanumKinematics
     Kinematics <|-- TankKinematics
@@ -86,9 +85,9 @@ classDiagram
     class Localizer {
         <<interface>>
         + update()
-        + getPose(): Pose2d
-        + getVelocity(): Pose2d
-        + setPose(Pose2d)
+        + getPose(): Pose
+        + getVelocity(): Pose
+        + setPose(Pose)
     }
     class PinpointLocalizer {
         - pinpoint: GoBildaPinpointDriver
@@ -103,7 +102,7 @@ classDiagram
 ```mermaid
 classDiagram
     class Pose {
-        + x, y, heading: Double
+        + x(), y(), heading(): Double
         + coordSystem: CoordinateSystem
         + distanceTo(Pose): Double
         + inCoordinateSystem(CoordinateSystem): Pose
@@ -134,13 +133,12 @@ classDiagram
 ```mermaid
 classDiagram
     class HolonomicTrajectoryFollower {
-        - kinematics: KinematicsSwitcher
         + update(currentPose, target): Object
     }
     class QuinticHermiteSpline {
-        + getPoint(t): Vector2d
-        + getVelocity(t): Vector2d
-        + getAcceleration(t): Vector2d
+        + getPoint(t): Vector
+        + getVelocity(t): Vector
+        + getAcceleration(t): Vector
     }
     class ArcLengthParameterizer {
         + getT(s): double

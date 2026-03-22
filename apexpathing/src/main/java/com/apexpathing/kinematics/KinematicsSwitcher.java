@@ -1,13 +1,28 @@
 package com.apexpathing.kinematics;
 
 /**
- * Interface to allow HolonomicTrajectoryFollower to output a ChassisSpeeds object
- * which is then passed to either MecanumKinematics or SwerveKinematics.
+ * Utility class to manage and switch between different kinematics implementations.
  */
-public interface KinematicsSwitcher {
+public class KinematicsSwitcher {
+    private static Kinematics activeKinematics;
+
     /**
-     * @param chassisSpeeds Target chassis speeds (vx, vy, omega).
-     * @return Output from the kinematics model (e.g., wheel speeds or module states).
+     * Sets the active drive type kinematics.
+     * @param kinematics The kinematics implementation to use.
      */
-    Object calculate(ChassisSpeeds chassisSpeeds);
+    public static void setDriveType(Kinematics kinematics) {
+        activeKinematics = kinematics;
+    }
+
+    /**
+     * Gets the active kinematics implementation.
+     * @return The current Kinematics object.
+     * @throws IllegalStateException if kinematics haven't been set.
+     */
+    public static Kinematics get() {
+        if (activeKinematics == null) {
+            throw new IllegalStateException("Kinematics must be set using KinematicsSwitcher.setDriveType() before use.");
+        }
+        return activeKinematics;
+    }
 }
