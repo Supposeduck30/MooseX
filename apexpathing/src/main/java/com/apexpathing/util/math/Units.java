@@ -1,5 +1,10 @@
 package com.apexpathing.util.math;
 
+/**
+* Class for conversion between distance units and angle units
+* @author Sohum Arora - 22985
+* @author Xander Haemel - 31616
+*/
 public class Units {
     public enum DistanceUnits {
         INCHES,
