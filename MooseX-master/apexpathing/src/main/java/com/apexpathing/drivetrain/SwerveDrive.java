@@ -1,5 +1,6 @@
 package com.apexpathing.drivetrain;
 
+import com.apexpathing.util.math.Pose;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -42,11 +43,11 @@ public class SwerveDrive extends CustomDrive {
         }
     }
 
-    private Pose2d currentPose = new Pose2d(0, 0, 0);
-    private Pose2d targetVelocity = new Pose2d(0, 0, 0);
+    private Pose currentPose = new Pose(0, 0, 0);
+    private Pose targetVelocity = new Pose(0, 0, 0);
 
     @Override
-    public void setDrivePowers(Pose2d drivePowers) {
+    public void setDrivePowers(Pose drivePowers) {
         this.targetVelocity = drivePowers;
 
         if (locked) {
