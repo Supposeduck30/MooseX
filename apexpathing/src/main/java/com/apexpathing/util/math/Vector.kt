@@ -30,6 +30,7 @@ data class Vector
     )
 {
     companion object {
+        @JvmOverloads()
         fun fromPolar(r: Double = 0.0, theta: Double = 0.0) =
             Vector(r * cos(theta), r * sin(theta))
     }
