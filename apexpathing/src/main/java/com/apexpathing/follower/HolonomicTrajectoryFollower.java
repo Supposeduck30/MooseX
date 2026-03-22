@@ -1,6 +1,7 @@
 package com.apexpathing.follower;
 
 import com.apexpathing.geometry.Pose2d;
+import com.apexpathing.geometry.Vector;
 import com.apexpathing.kinematics.ChassisSpeeds;
 import com.apexpathing.kinematics.KinematicsSwitcher;
 
@@ -20,12 +21,10 @@ public class HolonomicTrajectoryFollower {
     public static double kA = 0.01; // Acceleration feedforward
     public static double kCentripetal = 0.005; // Centripetal compensation
 
-    private final KinematicsSwitcher kinematics;
     private Pose2d lastError = new Pose2d(0, 0, 0);
     private long lastTime = -1;
 
-    public HolonomicTrajectoryFollower(KinematicsSwitcher kinematics) {
-        this.kinematics = kinematics;
+    public HolonomicTrajectoryFollower() {
     }
 
     /**
@@ -76,9 +75,12 @@ public class HolonomicTrajectoryFollower {
         double robotVX = worldVX * cos + worldVY * sin;
         double robotVY = -worldVX * sin + worldVY * cos;
 
-        ChassisSpeeds targetSpeeds = new ChassisSpeeds(robotVX, robotVY, feedbackTheta + feedforwardTheta);
+        ChassisSpeeds targetSpeeds = new ChassisSpeeds(
+            new Vector(robotVX, robotVY),
+            feedbackTheta + feedforwardTheta
+        );
 
-        return kinematics.calculate(targetSpeeds);
+        return KinematicsSwitcher.get().toWheelSpeeds(targetSpeeds);
     }
 
     private double normalizeAngle(double angle) {

@@ -1,40 +1,36 @@
 package com.apexpathing.kinematics;
 
 /**
- * Specialized MecanumKinematics class.
+ * Standard Mecanum inverse kinematics.
  */
 public class MecanumKinematics extends Kinematics {
     private final double trackWidth;
     private final double wheelBase;
-    private final double lateralMultiplier;
+    private final double[] cachedSpeeds = new double[4];
 
     /**
      * @param trackWidth Distance between left and right wheels.
      * @param wheelBase Distance between front and back wheels.
      */
-    public MecanumKinematics(double trackWidth, double wheelBase, double lateralMultiplier) {
+    public MecanumKinematics(double trackWidth, double wheelBase) {
         this.trackWidth = trackWidth;
         this.wheelBase = wheelBase;
-        this.lateralMultiplier = lateralMultiplier;
-    }
-
-    public double[] calculateWheelSpeeds(ChassisSpeeds chassisSpeeds) {
-        double vx = chassisSpeeds.vx;
-        double vy = chassisSpeeds.vy * lateralMultiplier;
-        double omega = chassisSpeeds.omega;
-
-        double k = (trackWidth + wheelBase) / 2.0;
-
-        double fl = vx - vy - k * omega;
-        double fr = vx + vy + k * omega;
-        double bl = vx + vy - k * omega;
-        double br = vx - vy + k * omega;
-
-        return new double[]{fl, fr, bl, br};
     }
 
     @Override
-    public double[] calculate(ChassisSpeeds chassisSpeeds) {
-        return calculateWheelSpeeds(chassisSpeeds);
+    public double[] toWheelSpeeds(ChassisSpeeds speeds) {
+        double vx = speeds.translation.getXComponent();
+        double vy = speeds.translation.getYComponent();
+        double omega = speeds.omega;
+
+        double k = (trackWidth + wheelBase) / 2.0;
+
+        // Front Left, Front Right, Back Left, Back Right
+        cachedSpeeds[0] = vx - vy - k * omega;
+        cachedSpeeds[1] = vx + vy + k * omega;
+        cachedSpeeds[2] = vx + vy - k * omega;
+        cachedSpeeds[3] = vx - vy + k * omega;
+
+        return cachedSpeeds;
     }
 }

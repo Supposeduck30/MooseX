@@ -1,34 +1,45 @@
 package com.apexpathing.kinematics;
 
-import com.apexpathing.geometry.Vector2d;
+import com.apexpathing.geometry.Vector;
 
 /**
- * Specialized SwerveKinematics class.
+ * Standard Swerve inverse kinematics using 4 module positions.
  */
 public class SwerveKinematics extends Kinematics {
-    private final Vector2d[] moduleOffsets;
+    private final Vector[] moduleOffsets;
+    private final SwerveModuleState[] states;
 
     /**
-     * @param moduleOffsets Offsets of the swerve modules from the robot center (FL, FR, BL, BR).
+     * @param moduleOffsets Positions of modules relative to robot center (FL, FR, BL, BR).
      */
-    public SwerveKinematics(Vector2d[] moduleOffsets) {
+    public SwerveKinematics(Vector[] moduleOffsets) {
         if (moduleOffsets.length != 4) {
-            throw new IllegalArgumentException("SwerveKinematics requires 4 module offsets.");
+            throw new IllegalArgumentException("SwerveKinematics requires 4 module positions.");
         }
         this.moduleOffsets = moduleOffsets;
+        this.states = new SwerveModuleState[4];
+        for (int i = 0; i < 4; i++) {
+            states[i] = new SwerveModuleState(new Vector(0, 0));
+        }
     }
 
     @Override
-    public SwerveModuleState[] calculate(ChassisSpeeds chassisSpeeds) {
-        SwerveModuleState[] states = new SwerveModuleState[4];
-        for (int i = 0; i < 4; i++) {
-            double vx = chassisSpeeds.vx - chassisSpeeds.omega * moduleOffsets[i].y;
-            double vy = chassisSpeeds.vy + chassisSpeeds.omega * moduleOffsets[i].x;
+    public SwerveModuleState[] toWheelSpeeds(ChassisSpeeds speeds) {
+        double vx = speeds.translation.getXComponent();
+        double vy = speeds.translation.getYComponent();
+        double omega = speeds.omega;
 
-            double speed = Math.hypot(vx, vy);
-            double angle = Math.atan2(vy, vx);
-            states[i] = new SwerveModuleState(speed, angle);
+        for (int i = 0; i < 4; i++) {
+            // v_i = v_robot + omega x r_i
+            // vx_i = vx - omega * ry_i
+            // vy_i = vy + omega * rx_i
+            double moduleVX = vx - omega * moduleOffsets[i].getYComponent();
+            double moduleVY = vy + omega * moduleOffsets[i].getXComponent();
+
+            states[i].velocity.setX(moduleVX);
+            states[i].velocity.setY(moduleVY);
         }
+
         return states;
     }
 }

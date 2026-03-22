@@ -6,12 +6,13 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import com.apexpathing.geometry.Pose2d;
-import com.apexpathing.geometry.Vector2d;
+import com.apexpathing.geometry.Vector;
 import com.apexpathing.hardware.MotorEx;
 import com.apexpathing.hardware.AbsoluteAnalogEncoder;
 import com.apexpathing.kinematics.ChassisSpeeds;
 import com.apexpathing.kinematics.SwerveKinematics;
 import com.apexpathing.kinematics.SwerveModuleState;
+import com.apexpathing.kinematics.KinematicsSwitcher;
 import com.apexpathing.localization.Localizer;
 import com.apexpathing.follower.HolonomicTrajectoryFollower;
 
@@ -26,10 +27,11 @@ public class SwerveDrive extends CustomDrive {
     private final SwerveKinematics kinematics;
     private boolean locked = false;
 
-    public SwerveDrive(HardwareMap hardwareMap, Localizer localizer, Vector2d[] moduleOffsets) {
+    public SwerveDrive(HardwareMap hardwareMap, Localizer localizer, Vector[] moduleOffsets) {
         this.localizer = localizer;
         this.kinematics = new SwerveKinematics(moduleOffsets);
-        this.controller = new HolonomicTrajectoryFollower(kinematics);
+        KinematicsSwitcher.setDriveType(kinematics);
+        this.controller = new HolonomicTrajectoryFollower();
 
         String[] moduleNames = {"FL", "FR", "BL", "BR"};
         for (int i = 0; i < 4; i++) {
@@ -57,11 +59,11 @@ public class SwerveDrive extends CustomDrive {
             return;
         }
 
-        ChassisSpeeds chassisSpeeds = new ChassisSpeeds(drivePowers.x, drivePowers.y, drivePowers.heading);
-        SwerveModuleState[] states = kinematics.calculate(chassisSpeeds);
+        ChassisSpeeds chassisSpeeds = new ChassisSpeeds(new Vector(drivePowers.x, drivePowers.y), drivePowers.heading);
+        SwerveModuleState[] states = kinematics.toWheelSpeeds(chassisSpeeds);
 
         for (int i = 0; i < 4; i++) {
-            modules[i].setDesiredState(states[i].speed, states[i].angle);
+            modules[i].setDesiredState(states[i].getSpeed(), states[i].getAngle());
         }
     }
 
